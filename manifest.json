@@ -1,0 +1,32 @@
+{
+  "name": "Strava Rank",
+  "version": "0.3",
+  "description": "Features: Sorting segments table. Personal rank, total count and percentile of segment. All segment efforts. Working analyse button on activity page. Working analyse button on bike segments.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "webNavigation",
+    "cookies",
+    "history",
+    "*://*.strava.com/activities/*",
+    "*://*.strava.com/segments/*",
+    "system.storage",
+    "downloads"
+  ],
+  "author": "Jelle Buitenhuis",
+  "homepage_url": "https://www.jellebuitenhuis.nl/",
+  "content_scripts": [{
+    "matches": ["*://*.strava.com/activities/*","*://*.strava.com/segments/*"],
+    "run_at": "document_end",
+    "all_frames": false,
+    "js": ["inject.js"]
+  }],
+  "background": {
+    "scripts": ["background.js"],
+    "matches": ["*://*.strava.com/activities/*","*://*.strava.com/segments/*"]
+  },
+  "content_security_policy":"connect-src https://*.google.com",
+  "web_accessible_resources": ["injected.js","inject.js","background.js"],
+  "manifest_version": 2
+}
