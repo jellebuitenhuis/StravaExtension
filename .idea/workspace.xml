@@ -25,10 +25,7 @@
     <list default="true" id="1b0013c3-c8d9-42b8-88c7-5d97eb4d4436" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/StravaRanks.zip" beforeDir="false" afterPath="$PROJECT_DIR$/StravaRanks.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/background.js" beforeDir="false" afterPath="$PROJECT_DIR$/background.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/inject.js" beforeDir="false" afterPath="$PROJECT_DIR$/inject.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/injected.js" beforeDir="false" afterPath="$PROJECT_DIR$/injected.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/manifest.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,6 +92,8 @@
       <workItem from="1602871587437" duration="8000" />
       <workItem from="1602877436242" duration="29000" />
       <workItem from="1603018443470" duration="22785000" />
+      <workItem from="1603104823150" duration="17057000" />
+      <workItem from="1603176964894" duration="612000" />
     </task>
     <servers />
   </component>
@@ -111,6 +110,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1600774423298">
@@ -134,18 +134,23 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="777" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040/-1920.155.1920.1040@0.0.1920.1040" timestamp="1603040752085" />
-    <state x="66" y="0" width="1435" height="1027" key="dock-window-1" timestamp="1600771507849">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="-1746" y="134" width="1535" height="1027" maximized="true" key="dock-window-1" timestamp="1603134225586">
+      <screen x="-1920" y="155" width="1920" height="1040" />
     </state>
+    <state x="-1746" y="134" width="1535" height="1027" maximized="true" key="dock-window-1/0.0.1920.1040/-1920.155.1920.1040@0.0.1920.1040" timestamp="1603134225586" />
     <state x="66" y="0" width="1435" height="1027" key="dock-window-1/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600771507849" />
     <state x="740" y="149" width="1435" height="1020" key="dock-window-2" timestamp="1600771507849">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="149" width="1435" height="1020" key="dock-window-2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600771507849" />
-    <state x="616" y="240" key="run.anything.popup" timestamp="1601404298430">
+    <state x="789" y="292" key="refactoring.ChangeSignatureDialog" timestamp="1603120450712">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="616" y="240" key="run.anything.popup/0.0.1920.1040/-1920.155.1920.1040@0.0.1920.1040" timestamp="1601404298430" />
+    <state x="789" y="292" key="refactoring.ChangeSignatureDialog/0.0.1920.1040/-1920.155.1920.1040@0.0.1920.1040" timestamp="1603120450712" />
+    <state x="616" y="240" key="run.anything.popup" timestamp="1603119065137">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="616" y="240" key="run.anything.popup/0.0.1920.1040/-1920.155.1920.1040@0.0.1920.1040" timestamp="1603119065137" />
     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1603037189010">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

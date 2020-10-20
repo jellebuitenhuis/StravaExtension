@@ -583,10 +583,26 @@ function sortSegmentTableDivider(col, table) {
         {
             divider = "."
         }
-        let t1min = Number(r1.querySelector(qs).innerText.split(divider)[0]);
-        let t1sec = Number(r1.querySelector(qs).innerText.split(divider)[1].replace(/[^0-9\.]+/g, ""));
-        let t2min = Number(r2.querySelector(qs).innerText.split(divider)[0]);
-        let t2sec = Number(r2.querySelector(qs).innerText.split(divider)[1].replace(/[^0-9\.]+/g, ""));
+        let t1sec, t2sec;
+        let t1min = Number(r1.querySelector(qs).innerText.split(divider)[0].replace(/[^0-9\.]+/g, ""));
+        let t2min = Number(r2.querySelector(qs).innerText.split(divider)[0].replace(/[^0-9\.]+/g, ""));
+        t1sec = r1.querySelector(qs).innerText.split(divider)[1];
+        t2sec = r2.querySelector(qs).innerText.split(divider)[1];
+        try {
+            t1sec = Number(t1sec.replace(/[^0-9\.]+/g, ""));
+        }
+        catch (e)
+        {
+            t1sec = t1min;
+            t1min = 0;
+        }
+        try {
+            t2sec = Number(t2sec.replace(/[^0-9\.]+/g, ""));
+        }
+        catch (e) {
+            t2sec = t2min;
+            t2min = 0;
+        }
         const compareMinutes = compareValues(t1min, t2min);
         const compareSeconds = compareValues(t1sec, t2sec);
         return (compareMinutes !== 0 ? compareMinutes : compareSeconds) * asc;
