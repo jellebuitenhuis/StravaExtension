@@ -114,7 +114,7 @@ function addAnalysis() {
                 percentileRow.innerText = 'Percentile';
                 percentileRow.className = 'expanded-only';
                 percentileRow.onclick = () => {
-                    sortSegmentTable(12,table)
+                    sortSegmentTable(12, table)
                 }
                 insertAfter(percentileRow, tableHeadRow.children[8]);
 
@@ -122,7 +122,7 @@ function addAnalysis() {
                 countRow.innerText = 'Count';
                 countRow.className = 'expanded-only';
                 countRow.onclick = () => {
-                    sortSegmentTable(11,table)
+                    sortSegmentTable(11, table)
                 }
                 insertAfter(countRow, tableHeadRow.children[8]);
 
@@ -130,7 +130,7 @@ function addAnalysis() {
                 rankRow.innerText = 'Rank';
                 rankRow.className = 'expanded-only';
                 rankRow.onclick = () => {
-                    sortSegmentTable(10,table)
+                    sortSegmentTable(10, table)
                 }
                 insertAfter(rankRow, tableHeadRow.children[8]);
 
@@ -271,8 +271,26 @@ function getLeaderBoard() {
                 let activityID = history.athlete_best_efforts[0]['activity_id']
                 let bestEffortID = history.athlete_best_efforts[0]['id']
                 if (history.athlete_best_efforts[0].activity_type === 1) {
+                    window.jQuery('body').on('click', '.options:eq(6)', () => {
+
+                        let check = window.jQuery('.table.table-striped.table-padded.table-leaderboard:eq(0) > tbody > tr')
+                        waitLeaderboardChange();
+
+                        function waitLeaderboardChange() {
+                            if (!check || check[9] === window.jQuery('.table.table-striped.table-padded.table-leaderboard:eq(0) > tbody > tr')[9]) {
+                                setTimeout(waitLeaderboardChange, 100)
+                                check = window.jQuery('.table.table-striped.table-padded.table-leaderboard:eq(0) > tbody > tr')
+                            } else {
+                                processBikeSegment(date, monthNames, activityID, bestEffortID, history)
+                            }
+
+                        }
+                    })
                     processBikeSegment(date, monthNames, activityID, bestEffortID, history)
                 } else {
+                    window.jQuery('body').on('click', '.options:eq(6)', () => {
+                        processRunSegment(date, monthNames, activityID, bestEffortID, history)
+                    })
                     processRunSegment(date, monthNames, activityID, bestEffortID, history)
                 }
             }
@@ -369,7 +387,6 @@ function processBikeSegment(date, monthNames, activityID, bestEffortID, history)
                 newRankTime.className = "last-child";
                 newRankTime.innerText = time;
                 newRank.appendChild(newRankTime);
-
                 if (!document.getElementById('RankElement')) {
                     tableBody.appendChild(newRank);
                 }
@@ -579,8 +596,7 @@ function sortSegmentTableDivider(col, table) {
 
     rows.sort((r1, r2) => {
         let divider = ":";
-        if(r1.querySelector(qs).innerText.includes("."))
-        {
+        if (r1.querySelector(qs).innerText.includes(".")) {
             divider = "."
         }
         let t1sec, t2sec;
@@ -590,16 +606,13 @@ function sortSegmentTableDivider(col, table) {
         t2sec = r2.querySelector(qs).innerText.split(divider)[1];
         try {
             t1sec = Number(t1sec.replace(/[^0-9\.]+/g, ""));
-        }
-        catch (e)
-        {
+        } catch (e) {
             t1sec = t1min;
             t1min = 0;
         }
         try {
             t2sec = Number(t2sec.replace(/[^0-9\.]+/g, ""));
-        }
-        catch (e) {
+        } catch (e) {
             t2sec = t2min;
             t2min = 0;
         }

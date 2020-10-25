@@ -1,4 +1,4 @@
-if(document.getElementById('runningDiv')) {
+if (document.getElementById('runningDiv')) {
     document.getElementById('runningDiv').remove()
 }
 if (typeof s === 'undefined') {
@@ -8,6 +8,11 @@ if (typeof s === 'undefined') {
         this.remove();
     };
     (document.head || document.documentElement).appendChild(s);
+
+    let jqry = document.createElement('script');
+    jqry.src = "https://code.jquery.com/jquery-3.5.1.min.js";
+    // (document.head || document.documentElement).appendChild(jqry);
+
 } else {
     s = document.createElement('script');
     s.src = chrome.extension.getURL('injected.js');
@@ -15,4 +20,7 @@ if (typeof s === 'undefined') {
         this.remove();
     };
     (document.head || document.documentElement).appendChild(s);
+    let jqry = document.createElement('script');
+    jqry.src = "https://code.jquery.com/jquery-3.5.1.min.js";
+    // (document.head || document.documentElement).appendChild(jqry);
 }
