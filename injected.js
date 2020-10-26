@@ -659,45 +659,66 @@ function getRank() {
                 } else {
                     PR.innerHTML = "Rank <time>" + rank + "</time>"
                     addCountOverview(PR, response, rank)
-                    let analyzeButton = document.querySelectorAll(`[data-segment-effort-id="${segmentId}"]`)[1]
-                    analyzeButton.className = analyzeButton.className.replace('analysis-link-js', '')
-                    analyzeButton.onclick = () => {
-                        pageView.router().changeMenuTo(`analysis/${response['start_index']}/${response['start_index'] + response['elapsed_time_raw']}`)
-                    }
-                    let time = response["overall_time"]
-                    let speed = response["avg_speed"]
-                    let tableBody = document.querySelector('[class*="segment-leaderboard"] > table > tbody')
-                    let newRank = document.createElement('tr');
+                    window.jQuery('body').on('click', '.options:eq(7)', () => {
 
-                    let newRankCell = document.createElement('td');
-                    newRankCell.innerText = rank;
-                    newRank.id = "RankElement"
-                    newRank.className = "highlighted"
-                    newRank.appendChild(newRankCell);
+                        let check = window.jQuery('.unstyled:eq(2) > tbody > tr')
+                        waitLeaderboardChange();
 
-                    let newRankAthlete = document.createElement('td');
-                    let newRankAthleteLink = document.createElement('a');
-                    newRankAthleteLink.href = '/athletes/' + currentAthlete.id;
-                    newRankAthleteLink.innerText = currentAthlete.attributes.display_name;
-                    newRankAthleteLink.className = 'minimal'
-                    newRankAthlete.className = "results-col-js"
-                    newRankAthlete.appendChild(newRankAthleteLink)
-                    newRank.appendChild(newRankAthlete)
+                        function waitLeaderboardChange() {
+                            if (!check || check[9] === window.jQuery('.unstyled:eq(2) > tbody > tr')[9] || document.getElementById('RankElement')) {
+                                setTimeout(waitLeaderboardChange, 100)
+                                check = window.jQuery('unstyled:eq(2) > tbody > tr')
+                            } else {
+                                console.log('hey')
+                                processBikeSegmentLeaderboard(response, segmentId, rank)
+                            }
 
-                    let newRankTime = document.createElement('td');
-                    newRankTime.innerHTML = `<a class="minimal" href="/segment_efforts/${segmentId}">${time}</a>`;
-                    newRank.appendChild(newRankTime);
+                        }
+                    })
+                    processBikeSegmentLeaderboard(response, segmentId, rank)
 
-                    let newRankSpeed = document.createElement('td')
-                    newRankSpeed.innerHTML = speed
-                    newRank.appendChild(newRankSpeed)
-
-                    if (!document.getElementById('RankElement')) {
-                        tableBody.appendChild(newRank);
-                    }
                 }
             }
         }
     }
     request.send()
+}
+
+function processBikeSegmentLeaderboard(response, segmentId, rank){
+    let analyzeButton = document.querySelectorAll(`[data-segment-effort-id="${segmentId}"]`)[1]
+    analyzeButton.className = analyzeButton.className.replace('analysis-link-js', '')
+    analyzeButton.onclick = () => {
+        pageView.router().changeMenuTo(`analysis/${response['start_index']}/${response['start_index'] + response['elapsed_time_raw']}`)
+    }
+    let time = response["overall_time"]
+    let speed = response["avg_speed"]
+    let tableBody = document.querySelector('[class*="segment-leaderboard"] > table > tbody')
+    let newRank = document.createElement('tr');
+
+    let newRankCell = document.createElement('td');
+    newRankCell.innerText = rank;
+    newRank.id = "RankElement"
+    newRank.className = "highlighted"
+    newRank.appendChild(newRankCell);
+
+    let newRankAthlete = document.createElement('td');
+    let newRankAthleteLink = document.createElement('a');
+    newRankAthleteLink.href = '/athletes/' + currentAthlete.id;
+    newRankAthleteLink.innerText = currentAthlete.attributes.display_name;
+    newRankAthleteLink.className = 'minimal'
+    newRankAthlete.className = "results-col-js"
+    newRankAthlete.appendChild(newRankAthleteLink)
+    newRank.appendChild(newRankAthlete)
+
+    let newRankTime = document.createElement('td');
+    newRankTime.innerHTML = `<a class="minimal" href="/segment_efforts/${segmentId}">${time}</a>`;
+    newRank.appendChild(newRankTime);
+
+    let newRankSpeed = document.createElement('td')
+    newRankSpeed.innerHTML = speed
+    newRank.appendChild(newRankSpeed)
+    if (!document.getElementById('RankElement')) {
+        console.log('appedn')
+        tableBody.appendChild(newRank);
+    }
 }
