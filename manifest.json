@@ -11,6 +11,7 @@
     "history",
     "*://*.strava.com/activities/*",
     "*://*.strava.com/segments/*",
+    "*://d3nn82uaxijpm6.cloudfront.net/assets/strava/segments/analysis/*.js",
     "system.storage",
     "downloads",
     "webRequest",
@@ -19,14 +20,15 @@
   "author": "Jelle Buitenhuis",
   "homepage_url": "https://www.jellebuitenhuis.nl/",
   "content_scripts": [{
-    "matches": ["*://*.strava.com/activities/*","*://*.strava.com/segments/*"],
+    "matches": ["*://*.strava.com/activities/*","*://*.strava.com/segments/*","*://d3nn82uaxijpm6.cloudfront.net/assets/strava/segments/analysis/*.js"],
     "run_at": "document_end",
     "all_frames": false,
     "js": ["inject.js"]
   }],
   "background": {
     "scripts": ["background.js"],
-    "matches": ["*://*.strava.com/activities/*","*://*.strava.com/segments/*"]
+    "persistent": true,
+    "matches": ["*://*.strava.com/activities/*","*://*.strava.com/segments/*","*://d3nn82uaxijpm6.cloudfront.net/assets/strava/segments/analysis/*.js"]
   },
   "web_accessible_resources": ["jquery.js","injected.js","inject.js","background.js"],
   "manifest_version": 2
