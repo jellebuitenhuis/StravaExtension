@@ -7,11 +7,16 @@ chrome.tabs.onUpdated.addListener(function (details) {
     var segmentId = 0;
     var baseEffort = 0;
     var compareEffort = 0;
-    var segmentRegex = /https:\/\/www\.strava\.com\/segments\/.*\/compare\/.*\/.*/
-    var compareRegex = /https:\/\/www\.strava\.com\/segments\/.*\/compare_efforts\?reference_id=.*&comparing_id=.*/
-    var effortRegex = /https:\/\/www\.strava\.com\/segment_efforts\/.*\/get_base_streams/
-    var flybyRegex = /https:\/\/labs\.strava\.com\/flyby\/viewer\/#\d+(\/\d+)+/
-    var matchesRegex = /https:\/\/nene\.strava\.com\/flyby\/matches\/\d+/
+    var segmentRegex = /strava\.com\/segments\/.*\/compare\/.*\/.*/
+    var compareRegex = /strava\.com\/segments\/.*\/compare_efforts\?reference_id=.*&comparing_id=.*/
+    var effortRegex = /strava\.com\/segment_efforts\/.*\/get_base_streams/
+    var flybyRegex = /labs\.strava\.com\/flyby\/viewer\/#\d+(\/\d+)+/
+    var matchesRegex = /nene\.strava\.com\/flyby\/matches\/\d+/
+    var streamCompareRegex =/nene\.strava\.com\/flyby\/stream_compare\/\d+\/\d+/
+
+    var equalizeTime = false;
+    var baseTime = 0;
+    var testing = false;
 
     var jsonTemplate = {
         "activity": {
@@ -125,14 +130,12 @@ chrome.webRequest.onBeforeRequest.addListener(
                 return {redirectUrl: `https://www.strava.com/segment_efforts/${baseEffort}/get_base_streams`}
             }
         }
-        if(details.url === "https://nene.strava.com/flyby/stream_compare/4267063442/4267189477")
-        {
-            return {redirectUrl: "https://nene.strava.com/flyby/stream_compare/4267063442/4266960806"}
-        }
+
         if(flybyRegex.test(details.url))
         {
             let ids = details.url.match(/\d+/g);
             let promises = []
+            equalizeTime = details.url.includes(`?equalize=true`)
             for(let i = 0; i < ids.length; i++)
             {
                 promises.push(fetch(`https://nene.strava.com/flyby/matches/${ids[i]}`).then((response) => {
@@ -146,6 +149,11 @@ chrome.webRequest.onBeforeRequest.addListener(
                     for(let i = 0; i < json.length; i++) {
                         if (i === 0) {
                             jsonTemplate.activity = json[i].activity
+                            baseTime = json[i].activity.startTime
+                        }
+                        if(equalizeTime)
+                        {
+                            json[i].activity.startTime = baseTime
                         }
                         jsonTemplate.matches.push({correlation: {}, otherActivity: json[i].activity})
                         jsonTemplate.athletes[json[i].activity.athleteId] = json[i].athletes[json[i].activity.athleteId]
@@ -172,6 +180,28 @@ chrome.webRequest.onBeforeRequest.addListener(
                 }
                 return {redirectUrl: `data:text/plain;base64,${btoa(JSON.stringify(temp))}`}
             }
+        }
+        
+        if(streamCompareRegex.test(details.url) && !testing && equalizeTime)
+        {
+            testing = true
+            let json = {}
+            let request2 = new XMLHttpRequest();
+            request2.open("GET", details.url,false);
+            request2.setRequestHeader("x-requested-with", "XMLHttpRequest");
+            request2.onreadystatechange = function () {
+                if (request2.readyState === XMLHttpRequest.DONE) {
+                    json = JSON.parse(request2.responseText)
+                }
+            }
+            request2.send()
+            let initialTime = json.stream[0].time;
+            for(let i = 0; i < json.stream.length; i++)
+            {
+                json.stream[i].time += baseTime-initialTime
+            }
+            testing = false;
+            return {redirectUrl: `data:text/plain;base64,${btoa(JSON.stringify(json))}`}
         }
     },
     {urls: ["*://labs.strava.com/flyby/viewer/*","*://*.strava.com/activities/*","*://*.strava.com/segments/*", "*://*.strava.com/segment_efforts/*","https://nene.strava.com/flyby/*"]},
