@@ -3,17 +3,176 @@ chrome.tabs.onUpdated.addListener(function (details) {
 
 });
 
+{
+    var segmentId = 0;
+    var baseEffort = 0;
+    var compareEffort = 0;
+    var segmentRegex = /https:\/\/www\.strava\.com\/segments\/.*\/compare\/.*\/.*/
+    var compareRegex = /https:\/\/www\.strava\.com\/segments\/.*\/compare_efforts\?reference_id=.*&comparing_id=.*/
+    var effortRegex = /https:\/\/www\.strava\.com\/segment_efforts\/.*\/get_base_streams/
+    var flybyRegex = /https:\/\/labs\.strava\.com\/flyby\/viewer\/#\d+(\/\d+)+/
+    var matchesRegex = /https:\/\/nene\.strava\.com\/flyby\/matches\/\d+/
+
+    var jsonTemplate = {
+        "activity": {
+
+        },
+        "matches": [
+
+        ],
+        "athletes": {
+        }
+
+    }
+    //    https://labs.strava.com/flyby/viewer/#4267063442/4266960806/4267455658
+
+    var jsonTest = {
+        "activity": {
+
+        },
+        "matches": [
+            {
+                "otherActivity": {
+                    "id": 4266960806,
+                    "athleteId": 33490643,
+                    "startTime": 1604154313,
+                    "elapsedTime": 4960,
+                    "name": "Morning Walk with San",
+                    "distance": 5340.7,
+                    "activityType": "Walk"
+                },
+                "correlation": {
+                    "correlation": 0,
+                    "spatialCorrelation": 0,
+                    "closestPoint": {
+                        "point": {
+                            "lat": 52.18637,
+                            "lng": 5.233713
+                        },
+                        "time": 1604133460
+                    },
+                    "closestDistance": 0
+                }
+            },
+            {
+                "otherActivity": {
+                    "id": 4267063442,
+                    "athleteId": 17109486,
+                    "startTime": 1604132363,
+                    "elapsedTime": 25010,
+                    "name": "MTB Hoge Vuursche, Lage Vuursche, Zeist en Austerlitz met Rosemarie",
+                    "distance": 112866,
+                    "activityType": "Ride"
+                },
+                "correlation": {
+                    "correlation": 1,
+                    "spatialCorrelation": 1,
+                    "closestPoint": {
+                        "point": {
+                            "lat": 0,
+                            "lng": 0
+                        },
+                        "time": 0
+                    },
+                    "closestDistance": 0
+                }
+            }
+        ],
+        "athletes": {
+            "33490643": {
+                "id": 33490643,
+                "firstName": "Jelle"
+            },
+            "17109486": {
+                "id": 17109486,
+                "firstName": "Marije"
+            }
+        }
+    }
+}
+
+chrome.webRequest.onBeforeSendHeaders.addListener(
+    function (details)
+    {
+        if (matchesRegex.test(details.url))
+        {
+            let headers = details.requestHeaders;
+            headers[headers.length] = {"name":"Origin","value":"https://labs.strava.com"};
+            return {requestHeaders: headers}
+        }
+    },
+    {urls: ["https://nene.strava.com/flyby/*"]},
+    ["requestHeaders","blocking","extraHeaders"]);
+
 
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
-        console.log(details)
-        if( details.url === "https://www.strava.com/segments/9857730/compare_efforts?reference_id=2693973757825279035&comparing_id=2713043196238199512" )
-            return {redirectUrl: "https://www.strava.com/segments/9857730/compare_efforts?reference_id=2746058350135595344&comparing_id=44603065039"};
-        if(details.url === "https://www.strava.com/segment_efforts/2693973757825279035/get_base_streams")
+        if(segmentRegex.test(details.url))
         {
-            console.log("effots")
-            return {redirectUrl: "https://www.strava.com/segment_efforts/2746058350135595344/get_base_streams" }
+            let matches = details.url.match(/\d+/g)
+            segmentId = matches[0]
+            baseEffort = matches[1]
+            compareEffort = matches[2]
+            return {redirectUrl: `https://www.strava.com/segments/${segmentId}/compare`};
+        }
+        if(segmentId !== 0) {
+            if (compareRegex.test(details.url) && details.url.match(/\d+/g)[0] === segmentId) {
+                if (details.url.match(/\d+/g)[1] !== baseEffort && details.url.match(/\d+/g)[2] !== compareEffort) {
+                    return {redirectUrl: `https://www.strava.com/segments/${segmentId}/compare_efforts?reference_id=${baseEffort}&comparing_id=${compareEffort}`};
+                }
+            }
+            if (effortRegex.test(details.url) && details.url.match(/\d+/g)[0] !== baseEffort) {
+                return {redirectUrl: `https://www.strava.com/segment_efforts/${baseEffort}/get_base_streams`}
+            }
+        }
+        if(details.url === "https://nene.strava.com/flyby/stream_compare/4267063442/4267189477")
+        {
+            return {redirectUrl: "https://nene.strava.com/flyby/stream_compare/4267063442/4266960806"}
+        }
+        if(flybyRegex.test(details.url))
+        {
+            let ids = details.url.match(/\d+/g);
+            let promises = []
+            for(let i = 0; i < ids.length; i++)
+            {
+                promises.push(fetch(`https://nene.strava.com/flyby/matches/${ids[i]}`).then((response) => {
+                    return response.json().then((json) => {
+                        return json
+                    })
+                }))
+            }
+            return Promise.all(promises).then(
+                (json) => {
+                    for(let i = 0; i < json.length; i++) {
+                        if (i === 0) {
+                            jsonTemplate.activity = json[i].activity
+                        }
+                        jsonTemplate.matches.push({correlation: {}, otherActivity: json[i].activity})
+                        jsonTemplate.athletes[json[i].activity.athleteId] = json[i].athletes[json[i].activity.athleteId]
+                    }
+
+                }
+            )
+        }
+        if(matchesRegex.test(details.url))
+        {
+            if(jsonTemplate.activity.id !== undefined){
+                let temp = jsonTemplate;
+                jsonTemplate = {
+                    "activity": {
+
+                    },
+                    "matches": [
+
+
+                    ],
+                    "athletes": {
+                    }
+
+                }
+                return {redirectUrl: `data:text/plain;base64,${btoa(JSON.stringify(temp))}`}
+            }
         }
     },
-    {urls: [    "*://*.strava.com/activities/*","*://*.strava.com/segments/*", "*://*.strava.com/segment_efforts/*","*://d3nn82uaxijpm6.cloudfront.net/assets/strava/segments/analysis/*.js"]},
+    {urls: ["*://labs.strava.com/flyby/viewer/*","*://*.strava.com/activities/*","*://*.strava.com/segments/*", "*://*.strava.com/segment_efforts/*","https://nene.strava.com/flyby/*"]},
     ["blocking"]);

@@ -34,7 +34,7 @@ if (!document.getElementById('runningDiv')) {
 
         }
 
-    } else if (window.location.pathname.split("/")[1] === "segments") {
+    } else if (window.location.pathname.split("/")[1] === "segments" && window.location.pathname.split("/")[3] !== "compare") {
         let runningLeaderboard = false;
         waitLeaderboard();
 
