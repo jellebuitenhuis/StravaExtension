@@ -11,7 +11,7 @@ Because Strava removed some options from segments, but still sends the data in t
   * Compare any two activities on the flyby screen. Use the following pattern: https:\/\/labs\.strava\.com\/flyby\/viewer\/#`\d+(\/\d+)+`
   
 ### Installation:
-1. Grab and extract the zipfile [StravaExtension.zip](/blob/master/StravaExtension.zip)
+1. Grab and extract the zipfile [StravaExtension.zip](/StravaExtension.zip)
 2. Open [chrome://extensions](chrome://extensions)
 3. In the topright click on "Developer mode"
 4. Click on "Load unpacked"
