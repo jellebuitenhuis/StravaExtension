@@ -103,12 +103,28 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         {
             let headers = details.requestHeaders;
             headers[headers.length] = {"name":"Origin","value":"https://labs.strava.com"};
+            headers[headers.length] = {"name":"origin","value":"https://labs.strava.com"};
             return {requestHeaders: headers}
         }
     },
     {urls: ["https://nene.strava.com/flyby/*"]},
     ["requestHeaders","blocking","extraHeaders"]);
 
+chrome.webRequest.onHeadersReceived.addListener(
+    function (details)
+    {
+        let headers = details.responseHeaders
+        for(let header of headers)
+        {
+            if(header.name === 'access-control-allow-origin')
+            {
+                header.value = "*"
+            }
+        }
+        return {responseHeaders: headers}
+    },
+    {urls: ["https://nene.strava.com/flyby/*"]},
+    ["responseHeaders","extraHeaders","blocking"]);
 
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
@@ -181,7 +197,7 @@ chrome.webRequest.onBeforeRequest.addListener(
                 return {redirectUrl: `data:text/plain;base64,${btoa(JSON.stringify(temp))}`}
             }
         }
-        
+
         if(streamCompareRegex.test(details.url) && !testing && equalizeTime)
         {
             testing = true

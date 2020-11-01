@@ -18,6 +18,44 @@ if (!document.getElementById('runningDiv')) {
 
         }
     }
+    let regex = /strava\.com\/activities\/\d+.*/
+    if(regex.test(window.location.href))
+    {
+        if(!window.localStorage.getItem("flybyIds"))
+        {
+            window.localStorage.setItem("flybyIds","[]")
+        }
+        let menu = document.getElementById('pagenav')
+        let flybyLink = document.createElement('li')
+        flybyLink.innerHTML = `<div>Flybys</div>`
+        flybyLink.id = 'flybyLink'
+        flybyLink.onclick = () => {
+            let matchId = window.location.href.match(/\d+/g)
+            addFlybyTable(matchId).then((table) => {
+                document.getElementById('view').innerHTML = ""
+                document.getElementById('view').appendChild(table)
+                let flybyButton = document.createElement('button')
+                flybyButton.innerText = 'Open Flybys'
+                flybyButton.className = 'btn btn-primary'
+                flybyButton.onclick = () => {
+                    let activityIds = JSON.parse(window.localStorage.getItem("flybyIds"))
+                    let baseUrl = `https://labs.strava.com/flyby/viewer/#${matchId}`
+                    for(let id of activityIds)
+                    {
+                        if(id != matchId)
+                        {
+                            baseUrl = baseUrl.concat(`/${id}`)
+                        }
+                    }
+                    window.open(baseUrl)
+                }
+                document.getElementById('flybyTable').appendChild(flybyButton)
+            })
+        }
+        if(!document.getElementById('flybyLink')){
+            menu.appendChild(flybyLink)
+        }
+    }
     if (window.location.pathname.split("/")[3] === "segments" && !isNaN(window.location.pathname.split("/")[4])) {
         let check = document.querySelector('[data-tracking-element="view_full_leaderboard"]')
         let running = false;
@@ -51,6 +89,77 @@ if (!document.getElementById('runningDiv')) {
 }
 {
     var asc = 1;
+    var monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+}
+
+function addFlybyTable(id)
+{
+    let table = document.createElement('table')
+    table.id = 'flybyTable'
+    table.innerHTML = `
+    <thead>
+    <th>Date</th>
+    <th>Name</th>
+    <th>Athlete</th>
+    <th>Add</th>
+    </thead>
+    <tbody></tbody>`
+    let flybys = getFlybys(id);
+    return flybys.then((response) => {
+        let matches = response.matches;
+        matches = matches.reduce((unique = [], o) => {
+            if (!unique.some(obj => obj.otherActivity.id === o.otherActivity.id)) {
+                unique.push(o);
+            }
+            return unique;
+        }, []);
+        for(let match of matches)
+        {
+            let tableRow = document.createElement('tr')
+            let date = new Date(match.otherActivity.startTime*1000)
+            let addInput = document.createElement('input')
+            addInput.type = 'checkbox'
+            addInput.value = match.otherActivity.id
+            addInput.checked = window.localStorage.getItem("flybyIds").includes(match.otherActivity.id)
+            addInput.onchange = (event) => {
+                if(event.target.checked)
+                {
+                    let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
+                    localStorage.push(event.target.value)
+                    window.localStorage.setItem("flybyIds",JSON.stringify(localStorage))
+
+                }
+                else {
+                    let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
+                    localStorage.splice(localStorage.indexOf(event.target.value),1)
+                    window.localStorage.setItem("flybyIds",JSON.stringify(localStorage))
+                }
+            }
+            tableRow.innerHTML = `
+            <td>${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}</td>
+            <td>${match.otherActivity.name}</td>
+            <td>${response.athletes[match.otherActivity.athleteId].firstName}</td>
+            `
+            let tableData = document.createElement('td')
+            tableData.appendChild(addInput)
+            tableRow.appendChild(tableData)
+            table.querySelector('tbody').appendChild(tableRow)
+        }
+        return table;
+    })
+}
+
+function getFlybys(id) {
+    let url = `https://nene.strava.com/flyby/matches/${id}`
+    return fetch(url,{
+        method: "GET"
+    }).then((response) => {
+        return response.json().then((result) => {
+            return result
+        })
+    })
 }
 
 function addAnalysis() {
@@ -265,9 +374,6 @@ function getLeaderBoard() {
                 let history = JSON.parse(request.responseText.replace(/"id":(\d+)/g, '"id":"$1"'));
                 let ms = history.athlete_best_efforts[0]['created_at'];
                 let date = new Date(Date.parse(ms));
-                const monthNames = ["January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
-                ];
                 let activityID = history.athlete_best_efforts[0]['activity_id']
                 let bestEffortID = history.athlete_best_efforts[0]['id']
                 if (history.athlete_best_efforts[0].activity_type === 1) {

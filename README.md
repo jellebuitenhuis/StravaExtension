@@ -9,7 +9,7 @@ Because Strava removed some options from segments, but still sends the data in t
   * The analyse button on the activity page now works
   * The analyse button on a bike segment now brings you to the analysis page with the segment selected
   * Compare any two activities on the flyby screen. Use the following pattern: https:\/\/labs\.strava\.com\/flyby\/viewer\/#`\d+(\/\d+)+`
-    * If you add `?equalize=true` all flyby's will have the same starting time
+    * If you add `?equalize=true` all flybys will have the same starting time
     * E.g. `https://labs.strava.com/flyby/viewer/#4267063442/4266960806/4267455658?equalize=true`
       * `4267063442` is the main activity id to compare against
       *  `4266960806` and `4267455658` are the activities to be compared against. This list can be infinitely big
