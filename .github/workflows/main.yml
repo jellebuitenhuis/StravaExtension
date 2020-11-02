@@ -23,7 +23,6 @@ jobs:
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
-      - name: Create zipfile
       - uses: montudor/action-zip@v0.1.0
         with:
           args: zip -qq -r StravaExtension.zip /
