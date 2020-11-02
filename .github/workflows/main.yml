@@ -19,7 +19,7 @@ jobs:
         with:
           files: manifest.json background.js inject.js injected.js
           dest: result.zip
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
-          name: my-artifact
-          path: ${{ github.workspace }}/result.zip
+          name: extension.zip
+          path: /
