@@ -21,5 +21,6 @@ jobs:
       
       - uses: thedoctor0/zip-release@master
         with:
-          filename: 'release.zip'
-          exclusions: '.gitignore .github/* README.md'
+          filename: 'StravaExtension.zip'
+          exclusions: '.git/* .gitignore .github/* README.md'
+          path: .
