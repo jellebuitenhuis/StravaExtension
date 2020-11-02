@@ -17,8 +17,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     steps:
-    - name: Archive Release
-      uses: thedoctor0/zip-release@master
-      with:
-        filename: 'release.zip'
-        exclusions: '.gitignore .github/* README.md'
+      - uses: actions/checkout@master
+      
+      - uses: thedoctor0/zip-release@master
+        with:
+          filename: 'release.zip'
+          exclusions: '.gitignore .github/* README.md'
