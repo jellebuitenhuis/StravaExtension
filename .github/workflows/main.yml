@@ -16,13 +16,10 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - uses: montudor/action-zip@v0.1.0
-        with:
-          args: zip -qq -r StravaExtension.zip /
+    - uses: actions/checkout@master
+    - name: Archive Release
+      uses: thedoctor0/zip-release@master
+      with:
+        filename: 'release.zip'
+        exclusions: '.gitignore .github/* README.md'
