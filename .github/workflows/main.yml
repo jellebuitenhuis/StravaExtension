@@ -21,5 +21,5 @@ jobs:
           dest: result.zip
       - uses: actions/upload-artifact@v2
         with:
-          name: extension.zip
-          path: extension.zip
+          name: result.zip
+          path: |
