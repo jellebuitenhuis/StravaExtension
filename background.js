@@ -11,6 +11,7 @@ chrome.tabs.onUpdated.addListener(function (details) {
     var compareRegex = /strava\.com\/segments\/.*\/compare_efforts\?reference_id=.*&comparing_id=.*/
     var effortRegex = /strava\.com\/segment_efforts\/.*\/get_base_streams/
     var flybyRegex = /labs\.strava\.com\/flyby\/viewer\/#\d+(\/\d+)+/
+    var flybyNotRegex = /labs\.strava\.com\/flyby\/viewer\/#\d+/
     var matchesRegex = /nene\.strava\.com\/flyby\/matches\/\d+/
     var streamCompareRegex =/nene\.strava\.com\/flyby\/stream_compare\/\d+\/\d+/
 
@@ -30,70 +31,6 @@ chrome.tabs.onUpdated.addListener(function (details) {
 
     }
     //    https://labs.strava.com/flyby/viewer/#4267063442/4266960806/4267455658
-
-    var jsonTest = {
-        "activity": {
-
-        },
-        "matches": [
-            {
-                "otherActivity": {
-                    "id": 4266960806,
-                    "athleteId": 33490643,
-                    "startTime": 1604154313,
-                    "elapsedTime": 4960,
-                    "name": "Morning Walk with San",
-                    "distance": 5340.7,
-                    "activityType": "Walk"
-                },
-                "correlation": {
-                    "correlation": 0,
-                    "spatialCorrelation": 0,
-                    "closestPoint": {
-                        "point": {
-                            "lat": 52.18637,
-                            "lng": 5.233713
-                        },
-                        "time": 1604133460
-                    },
-                    "closestDistance": 0
-                }
-            },
-            {
-                "otherActivity": {
-                    "id": 4267063442,
-                    "athleteId": 17109486,
-                    "startTime": 1604132363,
-                    "elapsedTime": 25010,
-                    "name": "MTB Hoge Vuursche, Lage Vuursche, Zeist en Austerlitz met Rosemarie",
-                    "distance": 112866,
-                    "activityType": "Ride"
-                },
-                "correlation": {
-                    "correlation": 1,
-                    "spatialCorrelation": 1,
-                    "closestPoint": {
-                        "point": {
-                            "lat": 0,
-                            "lng": 0
-                        },
-                        "time": 0
-                    },
-                    "closestDistance": 0
-                }
-            }
-        ],
-        "athletes": {
-            "33490643": {
-                "id": 33490643,
-                "firstName": "Jelle"
-            },
-            "17109486": {
-                "id": 17109486,
-                "firstName": "Marije"
-            }
-        }
-    }
 }
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
@@ -147,6 +84,16 @@ chrome.webRequest.onBeforeRequest.addListener(
             }
         }
 
+        if(flybyNotRegex.test(details.url) && !flybyRegex.test(details.url))
+        {
+            jsonTemplate = {
+                "activity": {},
+                "matches": [],
+                "athletes": {}
+            }
+            return {}
+        }
+
         if(flybyRegex.test(details.url))
         {
             let ids = details.url.match(/\d+/g);
@@ -154,9 +101,9 @@ chrome.webRequest.onBeforeRequest.addListener(
             equalizeTime = details.url.includes(`?equalize=true`)
             for(let i = 0; i < ids.length; i++)
             {
-                promises.push(fetch(`https://nene.strava.com/flyby/matches/${ids[i]}`).then((response) => {
-                    return response.json().then((json) => {
-                        return json
+                promises.push(fetch(`https://nene.strava.com/flyby/matches/${ids[i]}`,{mode: "no-cors"}).then((response) => {
+                    return response.text().then((json) => {
+                        return JSON.parse(json);
                     })
                 }))
             }
@@ -183,16 +130,9 @@ chrome.webRequest.onBeforeRequest.addListener(
             if(jsonTemplate.activity.id !== undefined){
                 let temp = jsonTemplate;
                 jsonTemplate = {
-                    "activity": {
-
-                    },
-                    "matches": [
-
-
-                    ],
-                    "athletes": {
-                    }
-
+                    "activity": {},
+                    "matches": [],
+                    "athletes": {}
                 }
                 return {redirectUrl: `data:text/plain;base64,${btoa(JSON.stringify(temp))}`}
             }

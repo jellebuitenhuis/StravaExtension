@@ -1,3 +1,12 @@
+{
+    var equalize = false;
+    var originalSort = false;
+    var sortAmount = 0;
+    var asc = 1;
+    var monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+}
 if (!document.getElementById('runningDiv')) {
     let runningDiv = document.createElement('div');
     runningDiv.id = 'runningDiv';
@@ -27,7 +36,7 @@ if (!document.getElementById('runningDiv')) {
         }
         let menu = document.getElementById('pagenav')
         let flybyLink = document.createElement('li')
-        flybyLink.innerHTML = `<div>Flybys</div>`
+        flybyLink.innerHTML = `<a data-menu="flybys">Flybys</a>`
         flybyLink.id = 'flybyLink'
         flybyLink.onclick = () => {
             let matchId = window.location.href.match(/\d+/g)
@@ -47,9 +56,29 @@ if (!document.getElementById('runningDiv')) {
                             baseUrl = baseUrl.concat(`/${id}`)
                         }
                     }
+                    if(equalize)
+                    {
+                        console.log(equalize)
+                        baseUrl = baseUrl.concat(`?equalize=true`)
+                    }
                     window.open(baseUrl)
                 }
-                document.getElementById('flybyTable').appendChild(flybyButton)
+                document.getElementById('view').appendChild(flybyButton)
+                let equalizeCheckbox = document.createElement('input')
+                equalizeCheckbox.id = 'flybyEqualizeCheckbox'
+                equalizeCheckbox.type = 'checkbox'
+                equalizeCheckbox.style = 'margin-left: 10px; margin-right: 5px'
+                let checkboxLabel = document.createElement('label')
+                checkboxLabel.htmlFor = 'flybyEqualizeCheckbox'
+                checkboxLabel.innerText = 'Equalize times?'
+                checkboxLabel.style.display = "initial"
+                equalizeCheckbox.onchange = (event) => {
+                    equalize = event.target.checked
+                }
+                insertAfter(checkboxLabel,flybyButton)
+                insertAfter(equalizeCheckbox,flybyButton)
+                let idTable = buildFlybyIdTable(matchId)
+                insertAfter(idTable,table)
             })
         }
         if(!document.getElementById('flybyLink')){
@@ -87,11 +116,84 @@ if (!document.getElementById('runningDiv')) {
         }
     }
 }
+
+function buildFlybyIdTable(matchId)
 {
-    var asc = 1;
-    var monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ];
+    let idTable = document.createElement('table')
+    idTable.id = 'idTable'
+    idTable.innerHTML = `
+                <thead>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Athlete</th>
+                    <th>Add</th>
+                </thead>
+                <tbody></tbody>
+                `
+    let activityIds = JSON.parse(window.localStorage.getItem("flybyIds"))
+    for(let id of activityIds)
+    {
+        fetch(`https://nene.strava.com/flyby/matches/${id}`,{
+            method: "GET"
+        }).then((response) => {
+            response.json().then((response) => {
+                let tableRow = document.createElement('tr')
+                let dateElement = document.createElement('td')
+                let date = new Date(response.activity.startTime*1000)
+                dateElement.innerText = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`
+                tableRow.appendChild(dateElement)
+
+                let nameElement = document.createElement('td')
+                nameElement.innerHTML = `<a href="https://strava.com/activities/${response.activity.id}">${response.activity.name}</a>`
+                tableRow.appendChild(nameElement)
+
+                let athleteElement = document.createElement('td')
+                athleteElement.innerText = `${response.athletes[response.activity.athleteId].firstName}`
+                tableRow.appendChild(athleteElement)
+
+                let buttonElement = document.createElement('td')
+                let addInput = buildCheckbox(response.activity, matchId)
+                buttonElement.appendChild(addInput)
+                tableRow.appendChild(buttonElement)
+                idTable.appendChild(tableRow)
+            })
+        })
+    }
+    return idTable
+}
+
+function buildCheckbox(activity, matchId)
+{
+    let addInput = document.createElement('input')
+    addInput.type = 'checkbox'
+    addInput.value = activity.id
+    addInput.checked = window.localStorage.getItem("flybyIds").includes(activity.id)
+    addInput.onchange = (event) => {
+        if(event.target.checked)
+        {
+            let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
+            localStorage.push(event.target.value)
+            window.localStorage.setItem("flybyIds",JSON.stringify(localStorage))
+            refreshFlybyTable(matchId)
+        }
+        else {
+            let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
+            localStorage.splice(localStorage.indexOf(event.target.value),1)
+            window.localStorage.setItem("flybyIds",JSON.stringify(localStorage))
+            refreshFlybyTable(matchId)
+        }
+    }
+    return addInput
+}
+
+function refreshFlybyTable(matchId)
+{
+    let table = document.getElementById('idTable')
+    let idTable = buildFlybyIdTable(matchId)
+    table.replaceWith(idTable)
+    addFlybyTable(matchId).then((table) => {
+        document.getElementById('flybyTable').replaceWith(table)
+    })
 }
 
 function addFlybyTable(id)
@@ -119,27 +221,10 @@ function addFlybyTable(id)
         {
             let tableRow = document.createElement('tr')
             let date = new Date(match.otherActivity.startTime*1000)
-            let addInput = document.createElement('input')
-            addInput.type = 'checkbox'
-            addInput.value = match.otherActivity.id
-            addInput.checked = window.localStorage.getItem("flybyIds").includes(match.otherActivity.id)
-            addInput.onchange = (event) => {
-                if(event.target.checked)
-                {
-                    let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
-                    localStorage.push(event.target.value)
-                    window.localStorage.setItem("flybyIds",JSON.stringify(localStorage))
-
-                }
-                else {
-                    let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
-                    localStorage.splice(localStorage.indexOf(event.target.value),1)
-                    window.localStorage.setItem("flybyIds",JSON.stringify(localStorage))
-                }
-            }
+            let addInput = buildCheckbox(match.otherActivity, id)
             tableRow.innerHTML = `
             <td>${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}</td>
-            <td>${match.otherActivity.name}</td>
+            <td><a href="https://strava.com/activities/${match.otherActivity.id}">${match.otherActivity.name}</a></td>
             <td>${response.athletes[match.otherActivity.athleteId].firstName}</td>
             `
             let tableData = document.createElement('td')
@@ -219,6 +304,22 @@ function addAnalysis() {
                     sortSegmentTable(9, table)
                 }
 
+                let percentileSegmentRow = document.createElement('th');
+                percentileSegmentRow.innerText = 'Percentage of your best effort';
+                percentileSegmentRow.className = 'expanded-only';
+                percentileSegmentRow.onclick = () => {
+                    sortSegmentTable(12, table)
+                }
+                insertAfter(percentileSegmentRow, tableHeadRow.children[8]);
+
+                let percentileKomRow = document.createElement('th');
+                percentileKomRow.innerText = 'Percentage of overall best effort';
+                percentileKomRow.className = 'expanded-only';
+                percentileKomRow.onclick = () => {
+                    sortSegmentTable(12, table)
+                }
+                insertAfter(percentileKomRow, tableHeadRow.children[8]);
+
                 let percentileRow = document.createElement('th');
                 percentileRow.innerText = 'Percentile';
                 percentileRow.className = 'expanded-only';
@@ -256,6 +357,23 @@ function addAnalysis() {
                             let response = JSON.parse(request.responseText)
                             let rank = response['viewer_overall_rank']
                             let count = response['viewer_overall_count']
+
+                            document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index
+
+                            let fastestTime = hmsToSecondsOnly(response.viewer_overall_time);
+                            let currentTime = response.elapsed_time_raw;
+                            let percentileSegmentElement = document.createElement('td')
+                            percentileSegmentElement.innerText = `${Math.round((1 - fastestTime / currentTime) * 100)}%`
+                            insertAfter(percentileSegmentElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
+
+                            let komTime = currentAthlete.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                            if(currentTime < komTime)
+                            {
+                                komTime = currentTime;
+                            }
+                            let percentileKomElement = document.createElement('td')
+                            percentileKomElement.innerText = `${Math.round((1 - komTime / currentTime) * 100)}%`
+                            insertAfter(percentileKomElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
 
                             let percentileElement = document.createElement('td')
                             percentileElement.innerText = Math.round((1 - (rank - 1) / count) * 100)
@@ -295,7 +413,6 @@ function addAnalysis() {
             hrRow.onclick = () => {
                 sortSegmentTable(10, table)
             }
-
 
             let percentileRow = document.createElement('th');
             percentileRow.innerText = 'Percentile';
@@ -355,6 +472,18 @@ function addAnalysis() {
         }
     }
 
+}
+
+function hmsToSecondsOnly(str) {
+    let p = str.split(':'),
+        s = 0, m = 1;
+
+    while (p.length > 0) {
+        s += m * parseInt(p.pop(), 10);
+        m *= 60;
+    }
+
+    return s;
 }
 
 function insertAfter(newNode, referenceNode) {
@@ -666,69 +795,128 @@ function preSortTable() {
 }
 
 function sortSegmentTable(col, table) {
+
     let rows = Array.from(table.querySelectorAll(`tr`));
 
-    let qs = `td:nth-child(${col}`;
-
-    rows.sort((r1, r2) => {
-        let t1min = Number(r1.querySelector(qs).innerText.replace(/[^0-9\.]+/g, ""));
-        let t2min = Number(r2.querySelector(qs).innerText.replace(/[^0-9\.]+/g, ""));
-        return compareValues(t1min, t2min) * asc
-    });
+    if(originalSort)
+    {
+        col = 1
+        let qs = `td:nth-child(${col}`;
+        rows.sort((r1, r2) => {
+            let t1min = Number(r1.querySelector(qs).value);
+            let t2min = Number(r2.querySelector(qs).value);
+            return compareValues(t1min, t2min)
+        });
+        originalSort = false;
+        sortAmount = -1;
+    }
+    else {
+        let qs = `td:nth-child(${col}`;
+        rows.sort((r1, r2) => {
+            let t1min = Number(r1.querySelector(qs).innerText.replace(/[^0-9\.]+/g, ""));
+            let t2min = Number(r2.querySelector(qs).innerText.replace(/[^0-9\.]+/g, ""));
+            return compareValues(t1min, t2min) * asc
+        });
+    }
 
     rows.forEach(row => table.appendChild(row));
-    asc *= -1
+    if(sortAmount === 1)
+    {
+        originalSort = true;
+    }
+    else {
+        asc *= -1;
+        sortAmount++;
+    }
 }
 
 function sortSegmentTableName(table) {
+    console.log(asc,originalSort,sortAmount)
     let rows = Array.from(table.querySelectorAll(`tr`));
 
-    let qs = `td:nth-child(4`;
+    if(originalSort)
+    {
+        let qs = `td:nth-child(1`;
+        rows.sort((r1, r2) => {
+            let t1min = Number(r1.querySelector(qs).value);
+            let t2min = Number(r2.querySelector(qs).value);
+            return compareValues(t1min, t2min)
+        });
+        originalSort = false;
+        sortAmount = -1;
+    }
+    else {
+        let qs = `td:nth-child(4`;
 
-    rows.sort((r1, r2) => {
-        let t1min = r1.querySelector(qs).innerText.toLowerCase();
-        let t2min = r2.querySelector(qs).innerText.toLowerCase();
-        return compareValues(t1min, t2min) * asc
-    });
-
+        rows.sort((r1, r2) => {
+            let t1min = r1.querySelector(qs).innerText.toLowerCase();
+            let t2min = r2.querySelector(qs).innerText.toLowerCase();
+            return compareValues(t1min, t2min) * asc
+        });
+    }
     rows.forEach(row => table.appendChild(row));
-    asc *= -1
+    if(sortAmount === 1)
+    {
+        originalSort = true;
+    }
+    else {
+        asc *= -1;
+        sortAmount++;
+    }
 }
 
 function sortSegmentTableDivider(col, table) {
     let rows = Array.from(table.querySelectorAll(`tr`));
+    if(originalSort)
+    {
+        let qs = `td:nth-child(1`;
+        rows.sort((r1, r2) => {
+            let t1min = Number(r1.querySelector(qs).value);
+            let t2min = Number(r2.querySelector(qs).value);
+            return compareValues(t1min, t2min)
+        });
+        originalSort = false;
+        sortAmount = -1;
+    }
+    else {
+        let qs = `td:nth-child(${col}`;
 
-    let qs = `td:nth-child(${col}`;
-
-    rows.sort((r1, r2) => {
-        let divider = ":";
-        if (r1.querySelector(qs).innerText.includes(".")) {
-            divider = "."
-        }
-        let t1sec, t2sec;
-        let t1min = Number(r1.querySelector(qs).innerText.split(divider)[0].replace(/[^0-9\.]+/g, ""));
-        let t2min = Number(r2.querySelector(qs).innerText.split(divider)[0].replace(/[^0-9\.]+/g, ""));
-        t1sec = r1.querySelector(qs).innerText.split(divider)[1];
-        t2sec = r2.querySelector(qs).innerText.split(divider)[1];
-        try {
-            t1sec = Number(t1sec.replace(/[^0-9\.]+/g, ""));
-        } catch (e) {
-            t1sec = t1min;
-            t1min = 0;
-        }
-        try {
-            t2sec = Number(t2sec.replace(/[^0-9\.]+/g, ""));
-        } catch (e) {
-            t2sec = t2min;
-            t2min = 0;
-        }
-        const compareMinutes = compareValues(t1min, t2min);
-        const compareSeconds = compareValues(t1sec, t2sec);
-        return (compareMinutes !== 0 ? compareMinutes : compareSeconds) * asc;
-    });
-
+        rows.sort((r1, r2) => {
+            let divider = ":";
+            if (r1.querySelector(qs).innerText.includes(".")) {
+                divider = "."
+            }
+            let t1sec, t2sec;
+            let t1min = Number(r1.querySelector(qs).innerText.split(divider)[0].replace(/[^0-9\.]+/g, ""));
+            let t2min = Number(r2.querySelector(qs).innerText.split(divider)[0].replace(/[^0-9\.]+/g, ""));
+            t1sec = r1.querySelector(qs).innerText.split(divider)[1];
+            t2sec = r2.querySelector(qs).innerText.split(divider)[1];
+            try {
+                t1sec = Number(t1sec.replace(/[^0-9\.]+/g, ""));
+            } catch (e) {
+                t1sec = t1min;
+                t1min = 0;
+            }
+            try {
+                t2sec = Number(t2sec.replace(/[^0-9\.]+/g, ""));
+            } catch (e) {
+                t2sec = t2min;
+                t2min = 0;
+            }
+            const compareMinutes = compareValues(t1min, t2min);
+            const compareSeconds = compareValues(t1sec, t2sec);
+            return (compareMinutes !== 0 ? compareMinutes : compareSeconds) * asc;
+        });
+    }
     rows.forEach(row => table.appendChild(row));
-    asc *= -1
+    if(sortAmount === 1)
+    {
+        originalSort = true;
+    }
+    else {
+        asc *= -1;
+        sortAmount++;
+    }
 }
 
 function getRank() {
