@@ -22,4 +22,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: result.zip
-          path: |
+          path: StravaExtension2.zip
