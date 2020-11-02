@@ -14,7 +14,7 @@ Because Strava removed some options from segments, but still sends the data in t
       * `4267063442` is the main activity id to compare against
       *  `4266960806` and `4267455658` are the activities to be compared against. This list can be infinitely big
       * `?equalize=true` equalizes all starting times
-  * A screen to mass add flybys
+  * A screen to mass add flybys for custom comparison
 ### Installation:
 1. Grab and extract the zipfile [StravaExtension.zip](/StravaExtension.zip)
 2. Open [chrome://extensions](chrome://extensions)
