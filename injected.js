@@ -305,18 +305,18 @@ function addAnalysis() {
                 }
 
                 let percentileSegmentRow = document.createElement('th');
-                percentileSegmentRow.innerText = 'Percentage of your best effort';
+                percentileSegmentRow.innerText = '% slower than your best effort';
                 percentileSegmentRow.className = 'expanded-only';
                 percentileSegmentRow.onclick = () => {
-                    sortSegmentTable(12, table)
+                    sortSegmentTable(14, table)
                 }
                 insertAfter(percentileSegmentRow, tableHeadRow.children[8]);
 
                 let percentileKomRow = document.createElement('th');
-                percentileKomRow.innerText = 'Percentage of overall best effort';
+                percentileKomRow.innerText = '% slower than overall best effort';
                 percentileKomRow.className = 'expanded-only';
                 percentileKomRow.onclick = () => {
-                    sortSegmentTable(12, table)
+                    sortSegmentTable(13, table)
                 }
                 insertAfter(percentileKomRow, tableHeadRow.children[8]);
 
@@ -363,7 +363,7 @@ function addAnalysis() {
                             let fastestTime = hmsToSecondsOnly(response.viewer_overall_time);
                             let currentTime = response.elapsed_time_raw;
                             let percentileSegmentElement = document.createElement('td')
-                            percentileSegmentElement.innerText = `${Math.round((1 - fastestTime / currentTime) * 100)}%`
+                            percentileSegmentElement.innerText = `${Math.round((currentTime / fastestTime -1) * 100)}%`
                             insertAfter(percentileSegmentElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
 
                             let komTime = currentAthlete.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
@@ -372,7 +372,7 @@ function addAnalysis() {
                                 komTime = currentTime;
                             }
                             let percentileKomElement = document.createElement('td')
-                            percentileKomElement.innerText = `${Math.round((1 - komTime / currentTime) * 100)}%`
+                            percentileKomElement.innerText = `${Math.round((currentTime / komTime - 1) * 100)}%`
                             insertAfter(percentileKomElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
 
                             let percentileElement = document.createElement('td')
@@ -414,6 +414,22 @@ function addAnalysis() {
                 sortSegmentTable(10, table)
             }
 
+            let percentileSegmentRow = document.createElement('th');
+            percentileSegmentRow.innerText = '% slower than your best effort';
+            percentileSegmentRow.className = 'expanded-only';
+            percentileSegmentRow.onclick = () => {
+                sortSegmentTable(15, table)
+            }
+            insertAfter(percentileSegmentRow, tableHeadRow.children[8]);
+
+            let percentileKomRow = document.createElement('th');
+            percentileKomRow.innerText = '% slower than overall best effort';
+            percentileKomRow.className = 'expanded-only';
+            percentileKomRow.onclick = () => {
+                sortSegmentTable(14, table)
+            }
+            insertAfter(percentileKomRow, tableHeadRow.children[8]);
+
             let percentileRow = document.createElement('th');
             percentileRow.innerText = 'Percentile';
             percentileRow.className = 'expanded-only';
@@ -452,6 +468,8 @@ function addAnalysis() {
                         let rank = response['viewer_overall_rank']
                         let count = response['viewer_overall_count']
 
+                        document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index
+
                         let percentileElement = document.createElement('td')
                         percentileElement.innerText = Math.round((1 - (rank - 1) / count) * 100)
 
@@ -465,6 +483,21 @@ function addAnalysis() {
                         let rankElement = document.createElement('td')
                         rankElement.innerText = rank
                         insertAfter(rankElement, secondToLastElement)
+
+                        let fastestTime = hmsToSecondsOnly(response.viewer_overall_time);
+                        let currentTime = response.elapsed_time_raw;
+                        let percentileSegmentElement = document.createElement('td')
+                        percentileSegmentElement.innerText = `${Math.round((currentTime / fastestTime -1) * 100)}%`
+                        insertAfter(percentileSegmentElement, percentileElement)
+
+                        let komTime = currentAthlete.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                        if(currentTime < komTime)
+                        {
+                            komTime = currentTime;
+                        }
+                        let percentileKomElement = document.createElement('td')
+                        percentileKomElement.innerText = `${Math.round((currentTime / komTime - 1) * 100)}%`
+                        insertAfter(percentileKomElement, percentileElement)
                     }
                 }
                 request.send()

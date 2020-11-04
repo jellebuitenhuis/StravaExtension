@@ -17,7 +17,7 @@ chrome.tabs.onUpdated.addListener(function (details) {
 
     var equalizeTime = false;
     var baseTime = 0;
-    var testing = false;
+    var matchingSegment = false;
 
     var jsonTemplate = {
         "activity": {
@@ -138,9 +138,9 @@ chrome.webRequest.onBeforeRequest.addListener(
             }
         }
 
-        if(streamCompareRegex.test(details.url) && !testing && equalizeTime)
+        if(streamCompareRegex.test(details.url) && !matchingSegment && equalizeTime)
         {
-            testing = true
+            matchingSegment = true
             let json = {}
             let request2 = new XMLHttpRequest();
             request2.open("GET", details.url,false);
@@ -156,7 +156,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             {
                 json.stream[i].time += baseTime-initialTime
             }
-            testing = false;
+            matchingSegment = false;
             return {redirectUrl: `data:text/plain;base64,${btoa(JSON.stringify(json))}`}
         }
     },
