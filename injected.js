@@ -366,7 +366,7 @@ function addAnalysis() {
                             percentileSegmentElement.innerText = `${Math.round((currentTime / fastestTime -1) * 100)}%`
                             insertAfter(percentileSegmentElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
 
-                            let komTime = currentAthlete.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                            let komTime = currentAthlete.attributes.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
                             if(currentTime < komTime)
                             {
                                 komTime = currentTime;
@@ -490,7 +490,7 @@ function addAnalysis() {
                         percentileSegmentElement.innerText = `${Math.round((currentTime / fastestTime -1) * 100)}%`
                         insertAfter(percentileSegmentElement, percentileElement)
 
-                        let komTime = currentAthlete.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                        let komTime = currentAthlete.attributes.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
                         if(currentTime < komTime)
                         {
                             komTime = currentTime;
