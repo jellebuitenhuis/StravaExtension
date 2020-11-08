@@ -415,7 +415,7 @@ function addAnalysis() {
             }
 
             let percentileSegmentRow = document.createElement('th');
-            percentileSegmentRow.innerText = '% slower than your best effort';
+            percentileSegmentRow.innerText = '% slower than personal best';
             percentileSegmentRow.className = 'expanded-only';
             percentileSegmentRow.onclick = () => {
                 sortSegmentTable(15, table)
@@ -423,7 +423,7 @@ function addAnalysis() {
             insertAfter(percentileSegmentRow, tableHeadRow.children[8]);
 
             let percentileKomRow = document.createElement('th');
-            percentileKomRow.innerText = '% slower than overall best effort';
+            percentileKomRow.innerText = '% slower than KOM/QOM';
             percentileKomRow.className = 'expanded-only';
             percentileKomRow.onclick = () => {
                 sortSegmentTable(14, table)
