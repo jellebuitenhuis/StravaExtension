@@ -7,6 +7,7 @@ Because Strava removed some options from segments, but still sends the data in t
   * On each segment you can see your personal rank, the total amount of attempts, and the percentile of your best attempt
   * You can see all attempts you made on a segment
   * The analyse button on the activity page now works
+  * The analysis button on a running segment takes you to the analysis page with the segment selected
   * The analyse button on a bike segment now brings you to the analysis page with the segment selected
   * Compare any two activities on the flyby screen. Use the following pattern: https:\/\/labs\.strava\.com\/flyby\/viewer\/#`\d+(\/\d+)+`
     * If you add `?equalize=true` all flybys will have the same starting time
