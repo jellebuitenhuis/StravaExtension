@@ -372,7 +372,7 @@ function addAnalysis() {
                             let activityAthlete = document.evaluate('/html/body/script[30]/text()',document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue.textContent;
                             let gender = activityAthlete.match(/"gender":"."/)[0]
                             let komTime = gender.includes("M") ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
-                            console.log(komTime)
+
                             if(currentTime < komTime)
                             {
                                 komTime = currentTime;
@@ -989,6 +989,12 @@ function getRank() {
                     if (!document.getElementById('RankElement')) {
                         PR.appendChild(rankElement);
                         addCountOverview(PR, response, rank)
+
+                        let segmentMenu = document.querySelector('[class*="link-menu no-margins row"]');
+                        let analysisButton = document.createElement('div')
+                        analysisButton.className = 'spans8'
+                        analysisButton.innerHTML = `<a class="track-click" href="/activities/${window.location.pathname.split("/")[2]}/analysis/${response.start_index}/${response.end_index}" data-tracking-element="analysis">Analysis</a>`
+                        segmentMenu.appendChild(analysisButton)
                     }
                 } else {
                     PR.innerHTML = "Rank <time>" + rank + "</time>"
