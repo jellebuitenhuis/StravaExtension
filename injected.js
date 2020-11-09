@@ -58,7 +58,6 @@ if (!document.getElementById('runningDiv')) {
                     }
                     if(equalize)
                     {
-                        console.log(equalize)
                         baseUrl = baseUrl.concat(`?equalize=true`)
                     }
                     window.open(baseUrl)
@@ -252,9 +251,12 @@ function addAnalysis() {
     let premiumView = document.getElementById('premium-views')
     let bikePage;
     try {
-        bikePage = premiumView.firstElementChild.className === 'title small';
-    } catch (e) {
-        bikePage = false
+        let activityData = JSON.parse(document.querySelector('[data-react-class="ActivityTagging"]').getAttribute('data-react-props'))
+        bikePage = activityData["activityType"] === "ride"
+    }
+    catch (e)
+    {
+        bikePage = document.querySelector('[class="title"]').innerText.includes('Ride')
     }
     if (premiumView && !bikePage) {
         let list = document.getElementById('premium-views')
@@ -355,7 +357,7 @@ function addAnalysis() {
                     request.onreadystatechange = function () {
                         if (request.readyState === XMLHttpRequest.DONE) {
                             let response = JSON.parse(request.responseText)
-                            let rank = response['viewer_overall_rank']
+                            let rank = response['overall_rank']
                             let count = response['viewer_overall_count']
 
                             document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index
@@ -363,16 +365,21 @@ function addAnalysis() {
                             let fastestTime = hmsToSecondsOnly(response.viewer_overall_time);
                             let currentTime = response.elapsed_time_raw;
                             let percentileSegmentElement = document.createElement('td')
-                            percentileSegmentElement.innerText = `${Math.round((currentTime / fastestTime -1) * 100)}%`
+                            let percent = Math.round((currentTime / fastestTime -1) * 100)
+                            percentileSegmentElement.innerText = `${isNaN(percent) ? 'N/A' : percent+'%'}`
                             insertAfter(percentileSegmentElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
 
-                            let komTime = currentAthlete.attributes.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                            let activityAthlete = document.evaluate('/html/body/script[30]/text()',document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue.textContent;
+                            let gender = activityAthlete.match(/"gender":"."/)[0]
+                            let komTime = gender.includes("M") ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                            console.log(komTime)
                             if(currentTime < komTime)
                             {
                                 komTime = currentTime;
                             }
                             let percentileKomElement = document.createElement('td')
-                            percentileKomElement.innerText = `${Math.round((currentTime / komTime - 1) * 100)}%`
+                            percent = Math.round((currentTime / komTime - 1) * 100);
+                            percentileKomElement.innerText = `${isNaN(percent) ? 'N/A' : percent+'%'}`
                             insertAfter(percentileKomElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
 
                             let percentileElement = document.createElement('td')
@@ -465,7 +472,7 @@ function addAnalysis() {
                 request.onreadystatechange = function () {
                     if (request.readyState === XMLHttpRequest.DONE) {
                         let response = JSON.parse(request.responseText)
-                        let rank = response['viewer_overall_rank']
+                        let rank = response['overall_rank']
                         let count = response['viewer_overall_count']
 
                         document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index
@@ -487,7 +494,8 @@ function addAnalysis() {
                         let fastestTime = hmsToSecondsOnly(response.viewer_overall_time);
                         let currentTime = response.elapsed_time_raw;
                         let percentileSegmentElement = document.createElement('td')
-                        percentileSegmentElement.innerText = `${Math.round((currentTime / fastestTime -1) * 100)}%`
+                        let percent = Math.round((currentTime / fastestTime -1) * 100)
+                        percentileSegmentElement.innerText = `${isNaN(percent) ? 'N/A' : percent+'%'}`
                         insertAfter(percentileSegmentElement, percentileElement)
 
                         let komTime = currentAthlete.attributes.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
@@ -846,8 +854,8 @@ function sortSegmentTable(col, table) {
     else {
         let qs = `td:nth-child(${col}`;
         rows.sort((r1, r2) => {
-            let t1min = Number(r1.querySelector(qs).innerText.replace(/[^0-9\.]+/g, ""));
-            let t2min = Number(r2.querySelector(qs).innerText.replace(/[^0-9\.]+/g, ""));
+            let t1min = Number(r1.querySelector(qs).innerText.replace(/[^0-9\-\.]+/g, ""));
+            let t2min = Number(r2.querySelector(qs).innerText.replace(/[^0-9\-\.]+/g, ""));
             return compareValues(t1min, t2min) * asc
         });
     }
@@ -864,7 +872,6 @@ function sortSegmentTable(col, table) {
 }
 
 function sortSegmentTableName(table) {
-    console.log(asc,originalSort,sortAmount)
     let rows = Array.from(table.querySelectorAll(`tr`));
 
     if(originalSort)
@@ -996,7 +1003,6 @@ function getRank() {
                                 setTimeout(waitLeaderboardChange, 100)
                                 check = window.jQuery('unstyled:eq(2) > tbody > tr')
                             } else {
-                                console.log('hey')
                                 processBikeSegmentLeaderboard(response, segmentId, rank)
                             }
 
@@ -1045,7 +1051,6 @@ function processBikeSegmentLeaderboard(response, segmentId, rank){
     newRankSpeed.innerHTML = speed
     newRank.appendChild(newRankSpeed)
     if (!document.getElementById('RankElement')) {
-        console.log('appedn')
         tableBody.appendChild(newRank);
     }
 }
