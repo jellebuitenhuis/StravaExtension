@@ -154,7 +154,7 @@ function buildFlybyIdTable(matchId)
                 let addInput = buildCheckbox(response.activity, matchId)
                 buttonElement.appendChild(addInput)
                 tableRow.appendChild(buttonElement)
-                idTable.appendChild(tableRow)
+                idTable.querySelector('tbody').appendChild(tableRow)
             })
         })
     }
@@ -268,6 +268,17 @@ function addAnalysis() {
         }
         list.innerHTML = `<a>${text}</a>`
     } else if (!bikePage) {
+        let navigationList = document.querySelector('.pagenav')
+        let analysisButton = document.createElement('li')
+        analysisButton.id = 'new-analysis'
+        analysisButton.className = 'track-click'
+        analysisButton.onclick = () => {
+            pageView.router().changeMenuTo(`analysis/0/1000`)
+        }
+        analysisButton.innerHTML = `<a>Analysis</a>`
+        if(!document.getElementById('new-analysis')){
+            navigationList.append(analysisButton)
+        }
         if (splitUrl[3] === 'analysis') {
             let list = document.getElementById('new-analysis')
             list.className = 'track-click selected'
@@ -369,7 +380,7 @@ function addAnalysis() {
                             percentileSegmentElement.innerText = `${isNaN(percent) ? 'N/A' : percent+'%'}`
                             insertAfter(percentileSegmentElement, document.querySelector(`[data-segment-effort-id="${id}"]`).children[8])
 
-                            let activityAthlete = document.evaluate('/html/body/script[30]/text()',document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue.textContent;
+                            let activityAthlete = document.evaluate('/html/body/script[contains(., "gender")]',document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue.textContent;
                             let gender = activityAthlete.match(/"gender":"."/)[0]
                             let komTime = gender.includes("M") ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
 

@@ -5,7 +5,7 @@ if (typeof s === 'undefined') {
     let s = document.createElement('script');
     s.src = chrome.extension.getURL('injected.js');
     s.onload = function () {
-        this.remove();
+        // this.remove();
     };
     (document.head || document.documentElement).appendChild(s);
 
@@ -13,7 +13,7 @@ if (typeof s === 'undefined') {
     s = document.createElement('script');
     s.src = chrome.extension.getURL('injected.js');
     s.onload = function () {
-        this.remove();
+        // this.remove();
     };
     (document.head || document.documentElement).appendChild(s);
 }
