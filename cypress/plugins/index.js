@@ -14,6 +14,12 @@ module.exports = (on, config) => {
         getRunSegment()  {
             return require('fs').readFileSync(require('path').resolve(__dirname, '../fixtures/RunTestSegment.html'), 'utf8')
         },
+        getRunSegmentLeaderboard()  {
+            return require('fs').readFileSync(require('path').resolve(__dirname, '../fixtures/RunTestSegmentLeaderboard.html'), 'utf8')
+        },
+        getRunLeaderboard()  {
+            return require('fs').readFileSync(require('path').resolve(__dirname, '../fixtures/RunTestLeaderboard.html'), 'utf8')
+        },
         getBikeOverview()  {
             return require('fs').readFileSync(require('path').resolve(__dirname, '../fixtures/BikeTestOverview.html'), 'utf8')
         },

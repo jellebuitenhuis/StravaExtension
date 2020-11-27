@@ -18,26 +18,40 @@ describe('Test the bike part', () => {
             cy.task('getBikeSegment').then((html) => {
                 cy.intercept({
                     method: 'GET',
-                    url: 'https://www.strava.com/activities/4302379489/segments/2760173451130440088'
+                    url: '/activities/4302379489/segments/2760173451130440088'
                 }, html)
             })
             cy.task('getBikeOverview').then((html) => {
                 cy.intercept({
                     method: 'GET',
-                    url: 'https://www.strava.com/activities/4302379489/overview'
+                    url: '/activities/4302379489/overview'
                 }, html)
                 cy.window().then((window) => {
                     window.document.cookie = `_strava4_session=${Cypress.env('STRAVA_LOGIN_COOKIE')};domain=.strava.com;path=/;secure=true`;
                 })
-                cy.visit('https://www.strava.com/activities/4302379489/overview')
             })
         })
 
-        it.only('tests the analysis button', () => {
-            cy.get('tr[data-segment-effort-id="2760173451130440088"]').click()
+        it('tests the flyby button', () => {
+            cy.visit('/activities/4302379489/overview')
+            cy.get('#flybyLink').should('be.visible').click()
+            cy.get('#flybyTable').should('be.visible')
+            cy.get('#idTable').should('be.visible')
+            cy.get('#flybyEqualizeCheckbox').should('be.visible')
+            cy.get('label[for="flybyEqualizeCheckbox"]').should('be.visible')
+            cy.get('input[value="4302379489"').click().should('be.checked')
+            cy.get('#idTable > tbody').find('tr').should('have.length',1)
+            cy.get('input[value="4302379489"').eq(1).click()
+            cy.get('input[value="4302379489"').should('not.be.checked')
+            cy.get('#idTable > tbody').find('tr').should('have.length',0)
+        })
+
+        it('tests the analysis button', () => {
+            cy.visit('/activities/4302379489/segments/2760173451130440088')
+            cy.wait(1000)
             cy.get('.pr-comparison > div').find('strong')
             cy.get('.pr-comparison > div').find('strong').then((element) => {
-                expect(element.text()).to.match(/\n Your PR\n \n \d+:\d{2}/)
+                expect(element.text()).to.match(/\n      Your PR\n      \n        \d+:\d{2}\n      \n    /)
             })
             cy.get('.pr-comparison > div > .rank').then((element) => {
                 expect(element.text()).to.match(/Rank \d+Total attempts \d+  Percentile \d{1,3}%/)
@@ -60,20 +74,6 @@ describe('Test the bike part', () => {
                 }
             })
         })
-
-        it('tests the flyby button', () => {
-            let flybyLink = cy.get('#flybyLink')
-            flybyLink.click()
-            cy.get('#flybyTable').should('be.visible')
-            cy.get('#idTable').should('be.visible')
-            cy.get('#flybyEqualizeCheckbox').should('be.visible')
-            cy.get('label[for="flybyEqualizeCheckbox"]').should('be.visible')
-            cy.get('input[value="4302379489"').click().should('be.checked')
-            cy.get('#idTable > tbody').find('tr').should('have.length',1)
-            cy.get('input[value="4302379489"').eq(1).click()
-            cy.get('input[value="4302379489"').should('not.be.checked')
-            cy.get('#idTable > tbody').find('tr').should('have.length',0)
-        })
     })
 
     describe('Segment testing', () => {
@@ -81,12 +81,12 @@ describe('Test the bike part', () => {
             cy.task('getBikeOverview').then((html) => {
                 cy.intercept({
                     method: 'GET',
-                    url: 'https://www.strava.com/activities/4302379489/overview'
+                    url: '/activities/4302379489/overview'
                 }, html)
                 cy.window().then((window) => {
                     window.document.cookie = `_strava4_session=${Cypress.env('STRAVA_LOGIN_COOKIE')};domain=.strava.com;path=/;secure=true`;
                 })
-                cy.visit('https://www.strava.com/activities/4302379489/overview')
+                cy.visit('/activities/4302379489/overview')
             })
         })
 

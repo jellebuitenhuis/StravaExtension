@@ -21,13 +21,13 @@
     "matches": ["*://*.strava.com/*"],
     "run_at": "document_end",
     "all_frames": true,
-    "js": ["inject.js"]
+    "js": ["scripts/inject.js", "scripts/util.js", "scripts/sortHelpers.js", "scripts/elementCreateHelpers.js"]
   }],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["scripts/background.js"],
     "persistent": true,
     "matches": ["*://*.strava.com/*"]
   },
-  "web_accessible_resources": ["jquery.js","injected.js","inject.js","background.js"],
+  "web_accessible_resources": ["jquery.js","scripts/injected.js","scripts/util.js","scripts/sortHelpers.js","scripts/elementCreateHelpers.js","scripts/inject.js","scripts/background.js"],
   "manifest_version": 2
 }
