@@ -3,96 +3,96 @@
 }
 
 function init() {
-    let regex = /strava\.com\/activities\/\d+.*/
+    let regex = /strava\.com\/activities\/\d+.*/;
     if (regex.test(window.location.href)) {
-        let check = () => document.getElementById('pagenav')
-        waitFor(check, addAnalysisButton)
-        addSegmentsToPage()
-        addFlybyLink()
+        let check = () => document.getElementById('pagenav');
+        waitFor(check, addAnalysisButton);
+        addSegmentsToPage();
+        addFlybyLink();
     }
     if (/\/activities\/\d+\/segments\/\d+\/?$/.test(window.location.pathname)) {
-        let check = () => document.querySelector('[data-tracking-element="view_full_leaderboard"]')
+        let check = () => document.querySelector('[data-tracking-element="view_full_leaderboard"]');
         waitFor(check, getRank);
     } else if (window.location.pathname.split("/")[1] === "segments" && window.location.pathname.split("/")[3] !== "compare") {
-        let check = () => typeof currentAthlete !== "undefined"
-        waitFor(check, getLeaderBoard)
+        let check = () => typeof currentAthlete !== "undefined";
+        waitFor(check, getLeaderBoard);
     }
 }
 
 function processRunSegmentData() {
     let efforts = document.querySelectorAll('[data-segment-effort-id]');
     for (let effort of efforts) {
-        let id = effort.getAttribute('data-segment-effort-id')
+        let id = effort.getAttribute('data-segment-effort-id');
         let url = "https://www.strava.com/segment_efforts/" + id;
         let request = new XMLHttpRequest();
         request.open("GET", url);
         request.setRequestHeader("x-requested-with", "XMLHttpRequest");
         request.onreadystatechange = function () {
             if (request.readyState === XMLHttpRequest.DONE) {
-                let response = JSON.parse(request.responseText)
-                let rank = response['overall_rank']
-                let count = response['viewer_overall_count']
+                let response = JSON.parse(request.responseText);
+                let rank = response['overall_rank'];
+                let count = response['viewer_overall_count'];
 
-                document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index
-                let lastIndex = 8
+                document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index;
+                let lastIndex = 8;
                 let fastestTime = hmsToSecondsOnly(response.viewer_overall_time);
                 let currentTime = response.elapsed_time_raw;
-                let percent = Math.round((currentTime / fastestTime - 1) * 100)
-                addSegmentCell(id, `${isNaN(percent) ? 'N/A' : percent + '%'}`, lastIndex)
+                let percent = Math.round((currentTime / fastestTime - 1) * 100);
+                addSegmentCell(id, `${isNaN(percent) ? 'N/A' : percent + '%'}`, lastIndex);
 
                 let activityAthlete = document.evaluate('/html/body/script[contains(., "gender")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.textContent;
-                let gender = activityAthlete.match(/"gender":"."/)[0]
-                let komTime = gender.includes("M") ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                let gender = activityAthlete.match(/"gender":"."/)[0];
+                let komTime = gender.includes("M") ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time);
                 if (currentTime < komTime) {
                     komTime = currentTime;
                 }
                 percent = Math.round((currentTime / komTime - 1) * 100);
-                addSegmentCell(id, `${isNaN(percent) ? 'N/A' : percent + '%'}`, lastIndex)
+                addSegmentCell(id, `${isNaN(percent) ? 'N/A' : percent + '%'}`, lastIndex);
 
-                addSegmentCell(id, Math.round((1 - (rank - 1) / count) * 100), lastIndex)
+                addSegmentCell(id, Math.round((1 - (rank - 1) / count) * 100), lastIndex);
 
-                addSegmentCell(id, count, lastIndex)
+                addSegmentCell(id, count, lastIndex);
 
-                addSegmentCell(id, rank, lastIndex)
+                addSegmentCell(id, rank, lastIndex);
             }
         }
-        request.send()
+        request.send();
     }
 }
 
 function processBikeSegmentData() {
     let efforts = document.querySelectorAll('[data-segment-effort-id]');
     for (let effort of efforts) {
-        let id = effort.getAttribute('data-segment-effort-id')
+        let id = effort.getAttribute('data-segment-effort-id');
         let url = "https://www.strava.com/segment_efforts/" + id;
         let request = new XMLHttpRequest();
         request.open("GET", url);
         request.setRequestHeader("x-requested-with", "XMLHttpRequest");
         request.onreadystatechange = function () {
             if (request.readyState === XMLHttpRequest.DONE) {
-                let response = JSON.parse(request.responseText)
-                let rank = response['overall_rank']
-                let count = response['viewer_overall_count']
+                let response = JSON.parse(request.responseText);
+                let rank = response['overall_rank'];
+                let count = response['viewer_overall_count'];
 
-                document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index
+                document.querySelector(`[data-segment-effort-id="${id}"]`).children[0].value = response.start_index;
 
                 let fastestTime = hmsToSecondsOnly(response.viewer_overall_time);
                 let currentTime = response.elapsed_time_raw;
 
-                let komTime = currentAthlete.attributes.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time)
+                let komTime = currentAthlete.attributes.gender === "M" ? hmsToSecondsOnly(response.kom_time) : hmsToSecondsOnly(response.qom_time);
                 if (currentTime < komTime) {
                     komTime = currentTime;
                 }
-                let percent = Math.round((currentTime / fastestTime - 1) * 100)
-                addSegmentCell(id, `${isNaN(percent) ? 'N/A' : percent+'%'}`, 9)
+                let percent = Math.round((currentTime / fastestTime - 1) * 100);
+                addSegmentCell(id, `${isNaN(percent) ? 'N/A' : percent+'%'}`, 9);
 
-                addSegmentCell(id,`${Math.round((currentTime / komTime - 1) * 100)}%`,9)
+                addSegmentCell(id,`${Math.round((currentTime / komTime - 1) * 100)}%`,9);
 
-                addSegmentCell(id,Math.round((1 - (rank - 1) / count) * 100),9)
+                addSegmentCell(id,Math.round((1 - (rank - 1) / count) * 100),9);
 
-                addSegmentCell(id, count, 9)
+                addSegmentCell(id, count, 9);
 
-                addSegmentCell(id, rank, 9)
+                addSegmentCell(id, rank, 9);
             }
         }
         request.send()
@@ -109,40 +109,40 @@ function addSegmentsToPage() {
                 let table = tableHeadRow.parentElement.parentElement.querySelector('tbody');
 
                 const headers = tableHeadRow.querySelectorAll('th');
-                let nameRow = headers[3]
+                let nameRow = headers[3];
                 nameRow.onclick = () => {
-                    sortSegmentTableName(table)
+                    sortSegmentTableName(table);
                 }
-                let timeRow = headers[4]
+                let timeRow = headers[4];
                 timeRow.onclick = () => {
-                    sortSegmentTableDivider(5, table)
+                    sortSegmentTableDivider(5, table);
                 }
-                let distanceRow = headers[5]
+                let distanceRow = headers[5];
                 distanceRow.onclick = () => {
-                    sortSegmentTable(6, table)
+                    sortSegmentTable(6, table);
                 }
-                let speedRow = headers[6]
+                let speedRow = headers[6];
                 speedRow.onclick = () => {
-                    sortSegmentTableDivider(7, table)
+                    sortSegmentTableDivider(7, table);
                 }
-                let elevationRow = headers[7]
+                let elevationRow = headers[7];
                 elevationRow.onclick = () => {
-                    sortSegmentTable(8, table)
+                    sortSegmentTable(8, table);
                 }
-                let hrRow = headers[8]
+                let hrRow = headers[8];
                 hrRow.onclick = () => {
-                    sortSegmentTable(9, table)
+                    sortSegmentTable(9, table);
                 }
                 addSegmentRow('% slower than personal best', 'expanded-only', () => {
-                    sortSegmentTable(14, table)
+                    sortSegmentTable(14, table);
                 })
 
                 addSegmentRow('% slower than KOM/QOM', 'expanded-only', () => {
-                    sortSegmentTable(13, table)
+                    sortSegmentTable(13, table);
                 })
 
                 addSegmentRow('Percentile', 'expanded-only', () => {
-                    sortSegmentTable(12, table)
+                    sortSegmentTable(12, table);
                 })
 
                 addSegmentRow('Count', 'expanded-only', () => {
@@ -157,10 +157,10 @@ function addSegmentsToPage() {
             }
         } else {
             let tableHeadRow = document.querySelector('[class*="dense hoverable marginless segments"] > thead > tr');
-            tableHeadRow.id = 'NewRow';
-            let table = document.getElementById("segments").firstElementChild.children[1].children[1];
+            tableHeadRow.id = 'NewRow'
+            let table = document.getElementById("segments").firstElementChild.children[1].children[1]
 
-            const headers = tableHeadRow.querySelectorAll('th');
+            const headers = tableHeadRow.querySelectorAll('th')
             let nameRow = headers[3]
             nameRow.onclick = () => {
                 sortSegmentTableName(table)
@@ -253,12 +253,12 @@ function buildCheckbox(activity, matchId) {
     addInput.checked = window.localStorage.getItem("flybyIds").includes(activity.id)
     addInput.onchange = (event) => {
         if (event.target.checked) {
-            let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
+            let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"))
             localStorage.push(event.target.value)
             window.localStorage.setItem("flybyIds", JSON.stringify(localStorage))
             refreshFlybyTable(matchId)
         } else {
-            let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"));
+            let localStorage = JSON.parse(window.localStorage.getItem("flybyIds"))
             localStorage.splice(localStorage.indexOf(event.target.value), 1)
             window.localStorage.setItem("flybyIds", JSON.stringify(localStorage))
             refreshFlybyTable(matchId)
@@ -270,7 +270,7 @@ function buildCheckbox(activity, matchId) {
 function addAnalysisButton() {
     let splitUrl = window.location.pathname.split("/")
     let premiumView = document.getElementById('premium-views')
-    let bikePage = checkIfBikePage();
+    let bikePage = checkIfBikePage()
     if (premiumView && !bikePage) {
         let list = document.getElementById('premium-views')
         let text = list.firstElementChild.innerText.split(' ')[1]
@@ -300,17 +300,17 @@ function addAnalysisButton() {
 }
 
 function getLeaderBoard() {
-    let domRank = JSON.parse(document.querySelector('[class*="leaderboard row"]').getAttribute('data-tracking')).viewer_rank;
+    let domRank = JSON.parse(document.querySelector('[class*="leaderboard row"]').getAttribute('data-tracking')).viewer_rank
     if (domRank > 10) {
-        let url = "https://www.strava.com/athlete/segments/" + window.location.pathname.split("/")[2] + "/history";
-        let request = new XMLHttpRequest();
-        request.open("GET", url);
-        request.setRequestHeader("x-requested-with", "XMLHttpRequest");
+        let url = "https://www.strava.com/athlete/segments/" + window.location.pathname.split("/")[2] + "/history"
+        let request = new XMLHttpRequest()
+        request.open("GET", url)
+        request.setRequestHeader("x-requested-with", "XMLHttpRequest")
         request.onreadystatechange = function () {
             if (request.readyState === XMLHttpRequest.DONE) {
-                let history = JSON.parse(request.responseText.replace(/"id":(\d+)/g, '"id":"$1"'));
-                let ms = history.athlete_best_efforts[0]['created_at'];
-                let date = new Date(Date.parse(ms));
+                let history = JSON.parse(request.responseText.replace(/"id":(\d+)/g, '"id":"$1"'))
+                let ms = history.athlete_best_efforts[0]['created_at']
+                let date = new Date(Date.parse(ms))
                 let activityID = history.athlete_best_efforts[0]['activity_id']
                 let bestEffortID = history.athlete_best_efforts[0]['id']
                 if (history.athlete_best_efforts[0].activity_type === 1) {
@@ -327,22 +327,22 @@ function getLeaderBoard() {
                 }
             }
         }
-        request.send();
+        request.send()
     } else {
-        let url = "https://www.strava.com/athlete/segments/" + window.location.pathname.split("/")[2] + "/history";
-        let request = new XMLHttpRequest();
-        request.open("GET", url);
-        request.setRequestHeader("x-requested-with", "XMLHttpRequest");
+        let url = "https://www.strava.com/athlete/segments/" + window.location.pathname.split("/")[2] + "/history"
+        let request = new XMLHttpRequest()
+        request.open("GET", url)
+        request.setRequestHeader("x-requested-with", "XMLHttpRequest")
         request.onreadystatechange = function () {
             if (request.readyState === XMLHttpRequest.DONE) {
-                let history = JSON.parse(request.responseText.replace(/"id":(\d+)/g, '"id":"$1"'));
+                let history = JSON.parse(request.responseText.replace(/"id":(\d+)/g, '"id":"$1"'))
                 if (!document.getElementById('effort_table')) {
-                    getRecentEfforts(history);
+                    getRecentEfforts(history)
                 }
-                let url = "https://www.strava.com/segment_efforts/" + history['athlete_best_efforts'][1]['id'];
-                let request2 = new XMLHttpRequest();
-                request2.open("GET", url);
-                request2.setRequestHeader("x-requested-with", "XMLHttpRequest");
+                let url = "https://www.strava.com/segment_efforts/" + history['athlete_best_efforts'][1]['id']
+                let request2 = new XMLHttpRequest()
+                request2.open("GET", url)
+                request2.setRequestHeader("x-requested-with", "XMLHttpRequest")
                 request2.onreadystatechange = function () {
                     if (request2.readyState === XMLHttpRequest.DONE) {
                         let response = JSON.parse(request2.responseText)
@@ -353,41 +353,41 @@ function getLeaderBoard() {
 
             }
         }
-        request.send();
+        request.send()
     }
 }
 
 function processSegment(date, monthNames, activityID, bestEffortID, history, domRank) {
-    let url = "https://www.strava.com/segment_efforts/" + bestEffortID;
-    let request2 = new XMLHttpRequest();
-    request2.open("GET", url);
-    request2.setRequestHeader("x-requested-with", "XMLHttpRequest");
+    let url = "https://www.strava.com/segment_efforts/" + bestEffortID
+    let request2 = new XMLHttpRequest()
+    request2.open("GET", url)
+    request2.setRequestHeader("x-requested-with", "XMLHttpRequest")
     request2.onreadystatechange = function () {
         if (request2.readyState === XMLHttpRequest.DONE) {
             let response = JSON.parse(request2.responseText)
 
-            let rank = response["viewer_overall_rank"];
+            let rank = response["viewer_overall_rank"]
             addCountLeaderboard(response, rank)
             if (rank != null || domRank != null) {
-                addPersonalRank(response, rank, domRank, date, activityID);
+                addPersonalRank(response, rank, domRank, date, activityID)
             }
             if (!document.getElementById('effort_table')) {
-                getRecentEfforts(history);
+                getRecentEfforts(history)
             }
         }
     }
-    request2.send();
+    request2.send()
 }
 
 function getRecentEfforts(history) {
     const monthNames = ["January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
-    ];
-    let recentEfforts = document.getElementsByClassName("recent-efforts-upsell")[0];
-    recentEfforts.innerHTML = "";
+    ]
+    let recentEfforts = document.getElementsByClassName("recent-efforts-upsell")[0]
+    recentEfforts.innerHTML = ""
     recentEfforts.style = "overflow-y: scroll"
     recentEfforts.id = "customEfforts"
-    let table = document.createElement("table");
+    let table = document.createElement("table")
     table.className = "table table-striped table-padded"
     table.innerHTML = "<thead>" +
         "<tr>" +
@@ -400,37 +400,37 @@ function getRecentEfforts(history) {
         "</thead>" +
         "<tbody id='effort_table'></tbody>"
     recentEfforts.appendChild(table)
-    let effortTableBody = document.getElementById('effort_table');
+    let effortTableBody = document.getElementById('effort_table')
     history.efforts = history.efforts.sort(function (a, b) {
-        return parseInt(a.elapsed_time_raw) - parseInt(b.elapsed_time_raw);
-    });
+        return parseInt(a.elapsed_time_raw) - parseInt(b.elapsed_time_raw)
+    })
     for (let i = 0; i < history.efforts.length; i++) {
-        let effort = history.efforts[i];
+        let effort = history.efforts[i]
         if (!document.getElementById(effort.id)) {
-            let url = "https://www.strava.com/segment_efforts/" + effort.id;
-            let request3 = new XMLHttpRequest();
-            request3.open("GET", url, true);
-            request3.setRequestHeader("x-requested-with", "XMLHttpRequest");
+            let url = "https://www.strava.com/segment_efforts/" + effort.id
+            let request3 = new XMLHttpRequest()
+            request3.open("GET", url, true)
+            request3.setRequestHeader("x-requested-with", "XMLHttpRequest")
             request3.onreadystatechange = function () {
                 if (request3.readyState === XMLHttpRequest.DONE && request3.status !== 404) {
-                    let responseText = JSON.parse(request3.responseText);
-                    let time = responseText["elapsed_time"];
-                    let HR = responseText["avg_hr"];
-                    let speed = responseText["avg_speed"];
-                    let ms = effort['created_at'];
-                    let effortDate = new Date(Date.parse(ms));
-                    let effortShow = document.createElement("tr");
-                    effortShow.id = responseText.id;
+                    let responseText = JSON.parse(request3.responseText)
+                    let time = responseText["elapsed_time"]
+                    let HR = responseText["avg_hr"]
+                    let speed = responseText["avg_speed"]
+                    let ms = effort['created_at']
+                    let effortDate = new Date(Date.parse(ms))
+                    let effortShow = document.createElement("tr")
+                    effortShow.id = responseText.id
                     effortShow.innerHTML = `<td>${effort.activity.name}</td>` +
                         `<td class="track-click"><a href="/segment_efforts/${responseText.id}">${monthNames[effortDate.getMonth()]} ${effortDate.getDate()},${effortDate.getFullYear()}</a></td>` +
                         `<td>${speed}</td>` +
                         `<td>${HR}</td>` +
-                        `<td time=${responseText.elapsed_time_raw}>${time}</td>`;
-                    effortTableBody.appendChild(effortShow);
+                        `<td time=${responseText.elapsed_time_raw}>${time}</td>`
+                    effortTableBody.appendChild(effortShow)
                     preSortTable()
                 }
             }
-            request3.send();
+            request3.send()
         }
     }
 }
