@@ -1,6 +1,6 @@
 {
   "name": "Strava Rank",
-  "version": "0.4",
+  "version": "0.5",
   "description": "Features: Sorting segments table. Personal rank, total count and percentile of segment. All segment efforts. Working analyse button on activity page. Working analyse button on bike segments.",
   "permissions": [
     "activeTab",
