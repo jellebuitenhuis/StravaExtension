@@ -1,7 +1,0 @@
-{
-  "fixturesFolder": false,
-  "chromeWebSecurity": false,
-  "viewportHeight": 1080,
-  "viewportWidth": 1920,
-  "baseUrl": "https://www.strava.com"
-}
