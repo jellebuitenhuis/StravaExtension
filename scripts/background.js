@@ -1,5 +1,5 @@
 chrome.tabs.onUpdated.addListener(function (details) {
-    chrome.tabs.executeScript(null, {file: "inject.js"});
+    chrome.tabs.executeScript(null, {file: "scripts/inject.js"});
 
 });
 
@@ -32,13 +32,7 @@ chrome.tabs.onUpdated.addListener(function (details) {
     }
     //    https://labs.strava.com/flyby/viewer/#4267063442/4266960806/4267455658
 }
-chrome.cookies.getAll({
-        domain: ".strava.com"
-    },
-    function (cookies) {
-        console.log(cookies)
-    }
-);
+
 chrome.webRequest.onBeforeSendHeaders.addListener(
     function (details)
     {
